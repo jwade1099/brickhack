@@ -4,30 +4,32 @@ from datetime import datetime
 from bson import ObjectId
 from pydantic_core import CoreSchema, core_schema
 
-class PyObjectId:
+class PyObjectId(str):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not isinstance(v, (str, ObjectId)):
+            raise TypeError('ObjectId required')
+        if isinstance(v, str):
+            try:
+                ObjectId(v)
+            except Exception:
+                raise ValueError('Invalid ObjectId')
+        return str(v)
+
     @classmethod
     def __get_pydantic_core_schema__(
         cls,
         _source_type: Any,
-        _handler: GetJsonSchemaHandler,
+        _handler: GetJsonSchemaHandler
     ) -> CoreSchema:
-        return core_schema.json_or_python_schema(
-            json_schema=core_schema.str_schema(),
-            python_schema=core_schema.union_schema([
-                core_schema.is_instance_schema(ObjectId),
-                core_schema.no_info_plain_validator_function(
-                    lambda x: ObjectId(x) if not isinstance(x, ObjectId) else x
-                )
-            ]),
-            serialization=core_schema.plain_serializer_function_ser_schema(
-                lambda x: str(x) if isinstance(x, ObjectId) else x,
-                info_arg=False,
-                return_schema=core_schema.str_schema()
-            ),
-        )
+        return core_schema.str_schema()
 
 class UserModel(BaseModel):
-    id: Annotated[ObjectId, PyObjectId] = Field(default_factory=ObjectId, alias="_id")
+    id: PyObjectId = Field(default_factory=lambda: str(ObjectId()), alias="_id")
     username: str
     email: str
     password_hash: str
@@ -36,7 +38,6 @@ class UserModel(BaseModel):
     bio: Optional[str] = None
 
     model_config = {
-        "arbitrary_types_allowed": True,
         "populate_by_name": True,
         "json_schema_extra": {
             "example": {

@@ -1,21 +1,33 @@
 from fastapi import APIRouter, HTTPException
-from typing import List
+from typing import List, Dict
 from database.config import db
 from models.post import PostModel
 from bson import ObjectId
 from datetime import datetime
+import copy
 
 router = APIRouter()
 
+def convert_objectids_to_strings(post: Dict) -> Dict:
+    """Convert ObjectId fields to strings in a post dict"""
+    # Make a deep copy to avoid modifying the original
+    post_copy = copy.deepcopy(post)
+    post_copy["_id"] = str(post_copy["_id"])
+    post_copy["author_id"] = str(post_copy["author_id"])
+    if post_copy.get("topia_id"):
+        post_copy["topia_id"] = str(post_copy["topia_id"])
+    return post_copy
 
 @router.get("/feed", response_model=List[PostModel])
 async def get_feed():
     """Get user's feed items"""
     try:
-        # Fetch posts from MongoDB, sorted by creation date
         cursor = db.posts_collection.find().sort("created_at", -1)
-        posts = await cursor.to_list(length=20)  # Limit to 20 posts
-        return [PostModel(**post) for post in posts]
+        posts = await cursor.to_list(length=20)
+
+        # Convert each post's ObjectIds to strings
+        converted_posts = [convert_objectids_to_strings(post) for post in posts]
+        return [PostModel.parse_obj(post) for post in converted_posts]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -25,14 +37,18 @@ async def create_post(post: PostModel):
     """Create a new post"""
     try:
         post_dict = post.dict(by_alias=True)
-        post_dict["created_at"] = datetime.utcnow()
+        post_dict["_id"] = ObjectId(post_dict["_id"])
+        post_dict["author_id"] = ObjectId(post_dict["author_id"])
+        if post_dict.get("topia_id"):
+            post_dict["topia_id"] = ObjectId(post_dict["topia_id"])
 
+        post_dict["created_at"] = datetime.utcnow()
         result = await db.posts_collection.insert_one(post_dict)
 
-        # Fetch and return the created post
         created_post = await db.posts_collection.find_one({"_id": result.inserted_id})
         if created_post:
-            return PostModel(**created_post)
+            converted_post = convert_objectids_to_strings(created_post)
+            return PostModel.parse_obj(converted_post)
         raise HTTPException(status_code=404, detail="Post creation failed")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -56,7 +72,8 @@ async def get_post(post_id: str):
     try:
         post = await db.posts_collection.find_one({"_id": ObjectId(post_id)})
         if post:
-            return PostModel(**post)
+            converted_post = convert_objectids_to_strings(post)
+            return PostModel.parse_obj(converted_post)
         raise HTTPException(status_code=404, detail="Post not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,11 +1,11 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List, Annotated
+from typing import Optional, List
 from datetime import datetime
 from bson import ObjectId
 from .user import PyObjectId
 
 class TopiaModel(BaseModel):
-    id: Annotated[ObjectId, PyObjectId] = Field(default_factory=ObjectId, alias="_id")
+    id: PyObjectId = Field(default_factory=lambda: str(ObjectId()), alias="_id")
     name: str
     personality: str
     avatar: Optional[str] = None
@@ -14,7 +14,5 @@ class TopiaModel(BaseModel):
     post_count: int = 0
 
     model_config = {
-        "json_encoders": {ObjectId: str},
-        "populate_by_name": True,
-        "arbitrary_types_allowed": True
+        "populate_by_name": True
     }
