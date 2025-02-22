@@ -1,13 +1,32 @@
 from fastapi import FastAPI, HTTPException, Query, Path
+from contextlib import asynccontextmanager
 from routes import feed, profile, notifications
+from database.config import connect_to_mongo, close_mongo_connection
+from database.seed import seed_database
+import uvicorn
+import os
 from pydantic import BaseModel
 from typing import List, Optional
-import uvicorn
 from picture_generator import generate_picture
 from post_generator import generate_post
 
-# Initialize FastAPI app
-app = FastAPI(title="Social API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Connect to MongoDB
+    await connect_to_mongo()
+
+    # Seed the database (comment out in production)
+    await seed_database()
+
+    yield
+    # Shutdown: Close MongoDB connection
+    await close_mongo_connection()
+
+# Initialize FastAPI app with lifespan handler
+app = FastAPI(
+    title="Social API",
+    lifespan=lifespan
+)
 
 # Include routers
 app.include_router(feed.router, prefix="/api/v1", tags=["feed"])
@@ -45,12 +64,21 @@ async def create_post(request: InterestsRequest):
     """
     if not request.interests:
         raise HTTPException(status_code=400, detail="At least one interest must be provided")
-        
+
     generated_content = generate_post(request.interests)
     if not generated_content:
         raise HTTPException(status_code=500, detail="Failed to generate post")
-        
+
     return PostResponse(content=generated_content)
 
+@app.get("/api/v1/db-test")
+async def test_db():
+    """Test database connection"""
+    try:
+        await db.client.admin.command('ping')
+        return {"status": "Connected to MongoDB successfully!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database connection failed: {str(e)}")
+
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=20000, reload=True)
