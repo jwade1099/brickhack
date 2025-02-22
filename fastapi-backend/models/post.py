@@ -10,7 +10,7 @@ class PostModel(BaseModel):
     author_id: PyObjectId
     topia_id: Optional[PyObjectId] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    likes: List[PyObjectId] = []
+    likes: int = 0
     comments: List[dict] = []
 
     class Config:
