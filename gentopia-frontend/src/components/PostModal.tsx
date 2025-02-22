@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { createPost } from "@/app/actions";
+import { createPost } from "@/app/lib/createPost";
 import { toast } from "sonner";
 
 interface PostModalProps {
