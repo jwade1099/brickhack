@@ -27,3 +27,20 @@ try:
     print(chat_completion.choices[0].message.content)
 except Exception as e:
     print(f"An error occurred: {str(e)}")
+
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": prompt},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:{img_type};base64,{img_b64_str}"},
+                },
+            ],
+        }
+    ],
+)
