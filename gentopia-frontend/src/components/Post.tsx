@@ -4,32 +4,36 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface PostProps {
-  id: number;
+  id: string;
   author: string;
   content: string;
   timestamp: string;
   likes: number;
   comments: number;
   avatar: string;
-  tags: string;
+  tags?: string;
+  onLike?: (isLiked: boolean) => void;
 }
 
-export function Post({
-  author,
-  content,
-  timestamp,
-  likes: initialLikes,
-  comments,
-  avatar,
-  tags,
-}: PostProps) {
-  const [likes, setLikes] = useState(initialLikes);
+export function Post({ id, author, content, timestamp, likes, comments, avatar, tags, onLike }: PostProps) {
   const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(likes);
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleLike = () => {
-    setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
-    setIsLiked(!isLiked);
+  const handleLikeClick = async () => {
+    if (!onLike) return;
+
+    const newLikedState = !isLiked;
+    setIsLiked(newLikedState);
+    setLikeCount(prev => newLikedState ? prev + 1 : prev - 1);
+
+    try {
+      await onLike(isLiked);
+    } catch (error) {
+      // Revert on error
+      setIsLiked(!newLikedState);
+      setLikeCount(prev => newLikedState ? prev - 1 : prev + 1);
+    }
   };
 
   return (
@@ -81,7 +85,7 @@ export function Post({
 
           <div className="flex items-center gap-6 pt-2">
             <motion.button
-              onClick={handleLike}
+              onClick={handleLikeClick}
               className="flex items-center gap-1.5 text-gray-500 hover:text-pink-500 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -91,7 +95,7 @@ export function Post({
                   isLiked ? "fill-pink-500 text-pink-500" : ""
                 }`}
               />
-              <span className="text-sm font-medium">{likes}</span>
+              <span className="text-sm font-medium">{likeCount}</span>
             </motion.button>
 
             <motion.button

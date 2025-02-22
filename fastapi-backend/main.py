@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from picture_generator import generate_picture
 from post_generator import generate_post
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -32,6 +33,14 @@ app = FastAPI(
 app.include_router(feed.router, prefix="/api/v1", tags=["feed"])
 app.include_router(profile.router, prefix="/api/v1", tags=["profile"])
 app.include_router(notifications.router, prefix="/api/v1", tags=["notifications"])
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Add your frontend URL
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],  # Make sure PUT is included
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():
