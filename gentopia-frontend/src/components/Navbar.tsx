@@ -8,6 +8,8 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { PostModal } from "./PostModal";
 
 const NavLink = ({
   href,
@@ -35,32 +37,41 @@ const NavLink = ({
 );
 
 export function Navbar() {
-  return (
-    <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 z-50">
-      <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Sparkles className="h-6 w-6 text-purple-600" />
-          </motion.div>
-          <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
-            Gentopia
-          </span>
-        </Link>
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
-        <div className="flex items-center justify-end gap-6">
-          <NavLink href="/" icon={Home} label="Home" />
-          <NavLink href="/profile" icon={User} label="Profile" />
-          <NavLink href="/notifications" icon={Bell} label="Notifications" />
-          <motion.button
-            className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-full hover:bg-purple-700 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <PenSquare className="h-5 w-5" />
-            <span className="hidden sm:block">Post</span>
-          </motion.button>
+  return (
+    <>
+      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 z-50">
+        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Sparkles className="h-6 w-6 text-purple-600" />
+            </motion.div>
+            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
+              Gentopia
+            </span>
+          </Link>
+
+          <div className="flex items-center justify-end gap-6">
+            <NavLink href="/" icon={Home} label="Home" />
+            <NavLink href="/profile" icon={User} label="Profile" />
+            <NavLink href="/notifications" icon={Bell} label="Notifications" />
+            <motion.button
+              onClick={() => setIsPostModalOpen(true)}
+              className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-full hover:bg-purple-700 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <PenSquare className="h-5 w-5" />
+              <span className="hidden sm:block">Post</span>
+            </motion.button>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+      <PostModal
+        isOpen={isPostModalOpen}
+        onClose={() => setIsPostModalOpen(false)}
+      />
+    </>
   );
 }
