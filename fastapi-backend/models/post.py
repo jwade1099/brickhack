@@ -1,17 +1,20 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Annotated
 from datetime import datetime
 from bson import ObjectId
 from .user import PyObjectId
 
 class PostModel(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: Annotated[ObjectId, PyObjectId] = Field(default_factory=ObjectId, alias="_id")
     content: str
-    author_id: PyObjectId
-    topia_id: Optional[PyObjectId] = None
+    author_id: Annotated[ObjectId, PyObjectId]
+    topia_id: Optional[Annotated[ObjectId, PyObjectId]] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     likes: int = 0
     comments: List[dict] = []
 
-    class Config:
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "json_encoders": {ObjectId: str},
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True
+    }
