@@ -5,7 +5,7 @@ from bson import ObjectId
 from .user import PyObjectId
 
 class TopiaModel(BaseModel):
-    id: PyObjectId = Field(default_factory=lambda: str(ObjectId()), alias="_id")
+    id: str = Field(default_factory=lambda: str(ObjectId()), alias="_id")
     name: str
     personality: str
     avatar: Optional[str] = None

@@ -1,35 +1,10 @@
-from pydantic import BaseModel, Field, GetJsonSchemaHandler
-from typing import Optional, Any, Annotated
+from pydantic import BaseModel, Field
+from typing import Optional
 from datetime import datetime
 from bson import ObjectId
-from pydantic_core import CoreSchema, core_schema
-
-class PyObjectId(str):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not isinstance(v, (str, ObjectId)):
-            raise TypeError('ObjectId required')
-        if isinstance(v, str):
-            try:
-                ObjectId(v)
-            except Exception:
-                raise ValueError('Invalid ObjectId')
-        return str(v)
-
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls,
-        _source_type: Any,
-        _handler: GetJsonSchemaHandler
-    ) -> CoreSchema:
-        return core_schema.str_schema()
 
 class UserModel(BaseModel):
-    id: PyObjectId = Field(default_factory=lambda: str(ObjectId()), alias="_id")
+    id: str = Field(default_factory=lambda: str(ObjectId()), alias="_id")
     username: str
     email: str
     password_hash: str

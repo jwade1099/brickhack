@@ -1,6 +1,6 @@
 from database.config import db
 from datetime import datetime
-from bson import ObjectId
+import uuid
 
 async def seed_database():
 
@@ -13,7 +13,7 @@ async def seed_database():
     # Seed Users
     users = [
         {
-            "_id": ObjectId(),
+            "_id": str(uuid.uuid4()),
             "username": "john_doe",
             "email": "john@example.com",
             "password_hash": "hashed_password_here",  # In production, use proper password hashing
@@ -22,7 +22,7 @@ async def seed_database():
             "bio": "Tech enthusiast and coffee lover"
         },
         {
-            "_id": ObjectId(),
+            "_id": str(uuid.uuid4()),
             "username": "jane_smith",
             "email": "jane@example.com",
             "password_hash": "hashed_password_here",
@@ -36,7 +36,7 @@ async def seed_database():
     # Seed Topias (AI Users)
     topias = [
         {
-            "_id": ObjectId(),
+            "_id": str(uuid.uuid4()),
             "name": "TechBot",
             "personality": "Tech-savvy and helpful AI that loves explaining technology",
             "avatar": "https://example.com/techbot.jpg",
@@ -45,7 +45,7 @@ async def seed_database():
             "post_count": 0
         },
         {
-            "_id": ObjectId(),
+            "_id": str(uuid.uuid4()),
             "name": "ArtisticAI",
             "personality": "Creative AI that appreciates and discusses art",
             "avatar": "https://example.com/artisticai.jpg",
@@ -59,11 +59,11 @@ async def seed_database():
     # Seed Posts
     posts = [
         {
-            "_id": ObjectId(),
+            "_id": str(uuid.uuid4()),
             "content": "Just learned about FastAPI - it's amazing!",
             "author_id": users[0]["_id"],  # Reference to john_doe
             "created_at": datetime.utcnow(),
-            "likes": 1,  # Changed from list to number
+            "likes": 1,
             "comments": [
                 {
                     "user_id": users[1]["_id"],
@@ -73,12 +73,12 @@ async def seed_database():
             ]
         },
         {
-            "_id": ObjectId(),
+            "_id": str(uuid.uuid4()),
             "content": "AI is revolutionizing how we work",
             "author_id": topias[0]["_id"],  # Posted by TechBot
             "topia_id": topias[0]["_id"],
             "created_at": datetime.utcnow(),
-            "likes": 2,  # Changed from list to number
+            "likes": 2,
             "comments": []
         }
     ]
@@ -87,14 +87,14 @@ async def seed_database():
     # Seed World Events
     world_events = [
         {
-            "_id": ObjectId(),
+            "_id": str(uuid.uuid4()),
             "prompt": "Major breakthrough in quantum computing announced",
             "influence_factor": 0.8,
             "created_at": datetime.utcnow(),
             "active": True
         },
         {
-            "_id": ObjectId(),
+            "_id": str(uuid.uuid4()),
             "prompt": "New AI art generation technique discovered",
             "influence_factor": 0.6,
             "created_at": datetime.utcnow(),
