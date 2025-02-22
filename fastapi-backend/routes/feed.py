@@ -22,12 +22,26 @@ async def create_post(post: PostModel):
     """Create a new post"""
     try:
         post_dict = post.model_dump(by_alias=True)
-        post_dict["created_at"] = datetime.utcnow()
 
+        # Log the incoming post data
+        print(f"Creating new post: {post_dict}")
+
+        # Ensure created_at is a datetime object
+        if isinstance(post_dict["created_at"], str):
+            post_dict["created_at"] = datetime.fromisoformat(post_dict["created_at"].replace('Z', '+00:00'))
+        else:
+            post_dict["created_at"] = datetime.utcnow()
+
+        # Log the database operation
         result = await db.posts_collection.insert_one(post_dict)
+        print(f"Post created with ID: {result.inserted_id}")
+
         created_post = await db.posts_collection.find_one({"_id": post_dict["_id"]})
-        return PostModel.model_validate(created_post)
+        print(f"Retrieved created post: {created_post}")
+
+        return PostModel.from_mongo(created_post)
     except Exception as e:
+        print(f"Error creating post: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/feed/{post_id}", response_model=PostModel)

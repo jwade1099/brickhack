@@ -7,14 +7,17 @@ import { toast } from "sonner";
 interface PostModalProps {
   isOpen: boolean;
   onClose: () => void;
+  userId?: string;
 }
 
-export function PostModal({ isOpen, onClose }: PostModalProps) {
+export function PostModal({ isOpen, onClose, userId = "default-user-id" }: PostModalProps) {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!content.trim()) return;
+
     setIsSubmitting(true);
 
     try {
