@@ -1,6 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Image as ImageIcon } from "lucide-react";
+import { X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { createPost } from "@/app/actions";
+import { toast } from "sonner";
 
 interface PostModalProps {
   isOpen: boolean;
@@ -9,13 +11,29 @@ interface PostModalProps {
 
 export function PostModal({ isOpen, onClose }: PostModalProps) {
   const [content, setContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement post creation
-    console.log("Creating post:", content);
-    setContent("");
-    onClose();
+    setIsSubmitting(true);
+
+    try {
+      const result = await createPost(content);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      toast.success("Post created successfully!");
+      setContent("");
+      onClose();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create post"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -34,17 +52,20 @@ export function PostModal({ isOpen, onClose }: PostModalProps) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", duration: 0.5 }}
-            className="w-full max-w-xl bg-black rounded-xl shadow-xl z-10 overflow-hidden border border-gray-800"
+            className="w-full max-w-xl bg-white rounded-xl shadow-xl z-10 overflow-hidden"
           >
-            <div className="p-4 border-b border-gray-800 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white">Create Post</h2>
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Create Post
+              </h2>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className="p-1 hover:bg-gray-800 rounded-full transition-colors"
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                disabled={isSubmitting}
               >
-                <X className="h-6 w-6 text-gray-400" />
+                <X className="h-6 w-6 text-gray-500" />
               </motion.button>
             </div>
 
@@ -54,7 +75,8 @@ export function PostModal({ isOpen, onClose }: PostModalProps) {
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="What's on your mind?"
                 rows={5}
-                className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-800 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-900 outline-none transition-all resize-none"
+                disabled={isSubmitting}
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 text-black placeholder-gray-500 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
               />
 
               <div className="flex items-center gap-2">
@@ -62,9 +84,10 @@ export function PostModal({ isOpen, onClose }: PostModalProps) {
                   type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                  disabled={isSubmitting}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ImageIcon className="h-5 w-5 text-gray-400" />
+                  <ImageIcon className="h-5 w-5 text-gray-500" />
                 </motion.button>
               </div>
 
@@ -73,9 +96,10 @@ export function PostModal({ isOpen, onClose }: PostModalProps) {
                   type="submit"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  disabled={!content.trim()}
-                  className="px-6 py-2 bg-purple-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-purple-700 transition-colors"
+                  disabled={!content.trim() || isSubmitting}
+                  className="px-6 py-2 bg-purple-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-purple-700 transition-colors flex items-center gap-2"
                 >
+                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
                   Post
                 </motion.button>
               </div>
