@@ -1,6 +1,7 @@
 import Image from "next/image";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PostProps {
   id: number;
@@ -10,6 +11,7 @@ interface PostProps {
   likes: number;
   comments: number;
   avatar: string;
+  tags: string;
 }
 
 export function Post({
@@ -19,9 +21,11 @@ export function Post({
   likes: initialLikes,
   comments,
   avatar,
+  tags,
 }: PostProps) {
   const [likes, setLikes] = useState(initialLikes);
   const [isLiked, setIsLiked] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleLike = () => {
     setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
@@ -29,16 +33,37 @@ export function Post({
   };
 
   return (
-    <article className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800">
-      <div className="flex items-start gap-3">
-        <div className="relative h-10 w-10 rounded-full overflow-hidden">
-          <Image src={avatar} alt={author} fill className="object-cover" />
-        </div>
+    <motion.article
+      className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative overflow-hidden"
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      whileHover={{ scale: 1.01 }}
+      transition={{ duration: 0.2 }}
+    >
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.05 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
 
-        <div className="flex-1">
+      <div className="flex items-start gap-4">
+        <motion.div
+          className="relative h-12 w-12 rounded-full overflow-hidden ring-2 ring-purple-100"
+          whileHover={{ scale: 1.1 }}
+        >
+          <Image src={avatar} alt={author} fill className="object-cover" />
+        </motion.div>
+
+        <div className="flex-1 space-y-2">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+            <h3 className="font-semibold text-gray-900 flex items-center gap-1">
               {author}
+              <Sparkles className="h-4 w-4 text-yellow-500" />
             </h3>
             <span className="text-sm text-gray-500">
               {new Date(timestamp).toLocaleDateString(undefined, {
@@ -50,32 +75,45 @@ export function Post({
             </span>
           </div>
 
-          <p className="mt-2 text-gray-800 dark:text-gray-200">{content}</p>
+          <p className="text-gray-800 text-lg leading-relaxed">{content}</p>
 
-          <div className="mt-4 flex items-center gap-6">
-            <button
+          <div className="text-sm text-purple-600 font-medium">{tags}</div>
+
+          <div className="flex items-center gap-6 pt-2">
+            <motion.button
               onClick={handleLike}
-              className="flex items-center gap-1 text-gray-500 hover:text-pink-500 transition-colors"
+              className="flex items-center gap-1.5 text-gray-500 hover:text-pink-500 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <Heart
                 className={`h-5 w-5 ${
                   isLiked ? "fill-pink-500 text-pink-500" : ""
                 }`}
               />
-              <span className="text-sm">{likes}</span>
-            </button>
+              <span className="text-sm font-medium">{likes}</span>
+            </motion.button>
 
-            <button className="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors">
+            <motion.button
+              className="flex items-center gap-1.5 text-gray-500 hover:text-blue-500 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <MessageCircle className="h-5 w-5" />
-              <span className="text-sm">{comments}</span>
-            </button>
+              <span className="text-sm font-medium">{comments}</span>
+            </motion.button>
 
-            <button className="flex items-center gap-1 text-gray-500 hover:text-green-500 transition-colors">
+            <motion.button
+              className="flex items-center gap-1.5 text-gray-500 hover:text-green-500 transition-colors ml-auto"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <Share2 className="h-5 w-5" />
-            </button>
+              <span className="text-sm font-medium">Share</span>
+            </motion.button>
           </div>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }
