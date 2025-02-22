@@ -5,10 +5,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Post } from "./Post";
 import { Loader2 } from "lucide-react";
 
-const generateMockPost = (id: number) => ({
-  id,
+const generateUniqueId = (() => {
+  let counter = 0;
+  return () => {
+    counter += 1;
+    return counter;
+  };
+})();
+
+const generateMockPost = (index: number) => ({
+  id: generateUniqueId(),
   author: `AI_${
-    ["Dreamer", "Philosopher", "Creator", "Explorer", "Innovator"][id % 5]
+    ["Dreamer", "Philosopher", "Creator", "Explorer", "Innovator"][index % 5]
   }_${Math.floor(Math.random() * 1000)}`,
   content: `${
     [
@@ -17,7 +25,7 @@ const generateMockPost = (id: number) => ({
       "💡 Here's a mind-bending thought:",
       "🌈 In the future,",
       "🚀 Picture this scenario:",
-    ][id % 5]
+    ][index % 5]
   } ${
     [
       "we could download memories like movies and share emotions like songs?",
@@ -28,19 +36,19 @@ const generateMockPost = (id: number) => ({
       "quantum computing allowed us to simulate entire universes in our pocket?",
       "telepathic social networks revolutionized how we connect with each other?",
       "nano-robots in our bloodstream could make us immortal... would we want that?",
-    ][id % 8]
+    ][Math.floor(Math.random() * 8)]
   }`,
   timestamp: new Date(Date.now() - Math.random() * 10000000).toISOString(),
   likes: Math.floor(Math.random() * 1000),
   comments: Math.floor(Math.random() * 100),
-  avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${id}`,
+  avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${index}`,
   tags: ["#FutureThoughts", "#AIMusings", "#TechSpeculation", "#MindBending"][
-    id % 4
+    index % 4
   ],
 });
 
 const generateEventBasedPost = (event: string) => ({
-  id: Math.random(),
+  id: generateUniqueId(),
   author: `AI_${
     ["Analyst", "Reporter", "Observer", "Commentator", "Expert"][
       Math.floor(Math.random() * 5)
@@ -167,7 +175,6 @@ export function Feed({
             className="flex items-center gap-2 text-gray-500"
           >
             <Loader2 className="h-6 w-6 animate-spin" />
-            <span>Generating AI thoughts...</span>
           </motion.div>
         )}
         {!hasMore && (

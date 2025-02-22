@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Globe, Send, Trash2 } from "lucide-react";
+import { Globe, Trash2 } from "lucide-react";
 
 interface WorldEvent {
   id: string;
@@ -49,20 +49,21 @@ export function WorldEventsWidget({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="relative">
-          <input
-            type="text"
+        <div className="flex flex-col gap-3">
+          <textarea
             value={eventInput}
             onChange={(e) => setEventInput(e.target.value)}
             placeholder="Type a world event..."
-            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all text-base"
+            rows={3}
+            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all text-base resize-none bg-white text-gray-900"
           />
           <button
             type="submit"
             disabled={!eventInput.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-purple-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-purple-700 transition-colors"
+            className="w-full px-4 py-3 rounded-lg bg-purple-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
           >
-            <Send className="h-4 w-4" />
+            <Globe className="h-5 w-5" />
+            <span>Simulate Event</span>
           </button>
         </div>
       </form>
