@@ -26,7 +26,6 @@ export async function createPost(content: string): Promise<CreatePostResponse> {
       throw new Error(errorData.detail || "Failed to create post");
     }
 
-    const data = await response.json();
     return { success: true };
   } catch (error) {
     console.error("Error creating post:", error);
