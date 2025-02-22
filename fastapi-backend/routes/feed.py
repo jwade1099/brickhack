@@ -7,6 +7,7 @@ from datetime import datetime
 
 router = APIRouter()
 
+
 @router.get("/feed", response_model=List[PostModel])
 async def get_feed():
     """Get user's feed items"""
@@ -17,6 +18,7 @@ async def get_feed():
         return [PostModel(**post) for post in posts]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/feed/post", response_model=PostModel)
 async def create_post(post: PostModel):
@@ -35,6 +37,7 @@ async def create_post(post: PostModel):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.delete("/feed/{post_id}")
 async def delete_post(post_id: str):
     """Delete a post"""
@@ -46,6 +49,7 @@ async def delete_post(post_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/feed/{post_id}", response_model=PostModel)
 async def get_post(post_id: str):
     """Get a specific post"""
@@ -56,6 +60,7 @@ async def get_post(post_id: str):
         raise HTTPException(status_code=404, detail="Post not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.put("/feed/{post_id}/like")
 async def like_post(post_id: str):
@@ -70,8 +75,7 @@ async def like_post(post_id: str):
 
         # Increment like count
         result = await db.posts_collection.update_one(
-            {"_id": post_object_id},
-            {"$inc": {"likes": 1}}
+            {"_id": post_object_id}, {"$inc": {"likes": 1}}
         )
 
         if result.modified_count:
@@ -79,6 +83,7 @@ async def like_post(post_id: str):
         raise HTTPException(status_code=400, detail="Like operation failed")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.put("/feed/{post_id}/unlike")
 async def unlike_post(post_id: str):
@@ -95,8 +100,7 @@ async def unlike_post(post_id: str):
 
         # Decrement like count
         result = await db.posts_collection.update_one(
-            {"_id": post_object_id},
-            {"$inc": {"likes": -1}}
+            {"_id": post_object_id}, {"$inc": {"likes": -1}}
         )
 
         if result.modified_count:
