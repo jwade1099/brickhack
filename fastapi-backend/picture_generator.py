@@ -10,23 +10,18 @@ if not api_key:
 
 client = OpenAI(api_key=api_key)
 
-def image_generation():
+def generate_picture(prompt: str = "professional headshot of a person, digital art style") -> str:
+    """
+    Generate a profile picture using DALL-E and return the URL
+    """
     try:
-        # Test image generation
         image_response = client.images.generate(
             model="dall-e-2",
-            prompt="My friend jeff hitting a slam dunk",
+            prompt=prompt,
             n=1,
             size="256x256"
         )
-        print("Image Generation Test:")
-        print(f"Image URL: {image_response.data[0].url}\n")
+        return image_response.data[0].url
         
     except Exception as e:
-        print(f"Image Generation Error: {str(e)}\n")
-
-
-def main():
-    image_generation()
-
-main()
+        raise Exception(f"Failed to generate image: {str(e)}")
