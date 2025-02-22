@@ -1,13 +1,27 @@
 from fastapi import FastAPI, HTTPException, Query, Path
+from contextlib import asynccontextmanager
 from routes import feed, profile, notifications
+from database.config import connect_to_mongo, close_mongo_connection
+import uvicorn
+import os
 from pydantic import BaseModel
 from typing import List, Optional
-import uvicorn
 from picture_generator import generate_picture
 from post_generator import generate_post
 
-# Initialize FastAPI app
-app = FastAPI(title="Social API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Connect to MongoDB
+    await connect_to_mongo()
+    yield
+    # Shutdown: Close MongoDB connection
+    await close_mongo_connection()
+
+# Initialize FastAPI app with lifespan handler
+app = FastAPI(
+    title="Social API",
+    lifespan=lifespan
+)
 
 # Include routers
 app.include_router(feed.router, prefix="/api/v1", tags=["feed"])
